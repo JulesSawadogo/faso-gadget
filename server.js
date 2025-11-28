@@ -1,5 +1,5 @@
 /* ==========================================
-   FASO GADGET - Serveur Backend
+   FASO GADGET - Serveur Backend avec MongoDB
    Authentification + Gestion Produits + Commandes
    ========================================== */
 
@@ -7,12 +7,16 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { MongoClient } = require('mongodb');
 
-const PORT = 3000;
-const ORDERS_FILE = path.join(__dirname, 'commandes.json');
-const PRODUCTS_FILE = path.join(__dirname, 'produits.json');
-const CONFIG_FILE = path.join(__dirname, 'config.json');
+const PORT = process.env.PORT || 3000;
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+
+// MongoDB Configuration
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://julesrodriguesawadogo2_db_user:8MNvimcTtMepP7Mx@fasogadget.fzcjlak.mongodb.net/?appName=fasogadget';
+const DB_NAME = 'fasogadget';
+
+let db = null;
 
 // Créer le dossier uploads s'il n'existe pas
 if (!fs.existsSync(UPLOADS_DIR)) {
@@ -38,58 +42,62 @@ const MIME_TYPES = {
 const sessions = new Map();
 
 // ==========================================
-// FONCTIONS UTILITAIRES
+// CONNEXION MONGODB
 // ==========================================
 
-function loadJSON(file, defaultValue = []) {
+async function connectDB() {
     try {
-        if (fs.existsSync(file)) {
-            return JSON.parse(fs.readFileSync(file, 'utf8'));
-        }
-    } catch (error) {
-        console.error(`Erreur chargement ${file}:`, error);
-    }
-    return defaultValue;
-}
+        const client = new MongoClient(MONGODB_URI);
+        await client.connect();
+        db = client.db(DB_NAME);
+        console.log('✅ Connecté à MongoDB Atlas');
 
-function saveJSON(file, data) {
-    try {
-        fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+        // Initialiser les données par défaut si nécessaire
+        await initializeDB();
         return true;
     } catch (error) {
-        console.error(`Erreur sauvegarde ${file}:`, error);
+        console.error('❌ Erreur connexion MongoDB:', error.message);
         return false;
     }
 }
 
-function loadConfig() {
-    const defaultConfig = {
-        admin: { username: 'admin', password: 'admin' }
-    };
-    return loadJSON(CONFIG_FILE, defaultConfig);
+async function initializeDB() {
+    // Vérifier si config existe, sinon créer
+    const config = await db.collection('config').findOne({ _id: 'admin' });
+    if (!config) {
+        await db.collection('config').insertOne({
+            _id: 'admin',
+            username: 'admin',
+            password: 'admin'
+        });
+        console.log('📝 Configuration admin créée');
+    }
+
+    // Vérifier si des produits existent
+    const productsCount = await db.collection('products').countDocuments();
+    if (productsCount === 0) {
+        const defaultProducts = [
+            { name: "iPhone 15 Pro Max", category: "smartphone", price: 850000, image: "", badge: "Nouveau" },
+            { name: "Samsung Galaxy S24 Ultra", category: "smartphone", price: 750000, image: "", badge: "Populaire" },
+            { name: "Xiaomi 14 Pro", category: "smartphone", price: 450000, image: "", badge: "" },
+            { name: "AirPods Pro 2", category: "audio", price: 150000, image: "", badge: "Best-seller" },
+            { name: "Samsung Galaxy Buds 2 Pro", category: "audio", price: 95000, image: "", badge: "" },
+            { name: "JBL Flip 6", category: "audio", price: 85000, image: "", badge: "" },
+            { name: "Apple Watch Series 9", category: "montre", price: 350000, image: "", badge: "Nouveau" },
+            { name: "Samsung Galaxy Watch 6", category: "montre", price: 250000, image: "", badge: "" },
+            { name: "Coque iPhone Protection", category: "accessoire", price: 15000, image: "", badge: "" },
+            { name: "Chargeur Rapide 65W", category: "accessoire", price: 25000, image: "", badge: "Promo" },
+            { name: "Power Bank 20000mAh", category: "accessoire", price: 35000, image: "", badge: "" },
+            { name: "Câble USB-C Tressé", category: "accessoire", price: 8000, image: "", badge: "" }
+        ];
+        await db.collection('products').insertMany(defaultProducts);
+        console.log('📦 Produits par défaut créés');
+    }
 }
 
-function saveConfig(config) {
-    return saveJSON(CONFIG_FILE, config);
-}
-
-function loadProducts() {
-    const defaultProducts = [
-        { id: 1, name: "iPhone 15 Pro Max", category: "smartphone", price: 850000, image: "", badge: "Nouveau" },
-        { id: 2, name: "Samsung Galaxy S24 Ultra", category: "smartphone", price: 750000, image: "", badge: "Populaire" },
-        { id: 3, name: "Xiaomi 14 Pro", category: "smartphone", price: 450000, image: "", badge: "" },
-        { id: 4, name: "AirPods Pro 2", category: "audio", price: 150000, image: "", badge: "Best-seller" },
-        { id: 5, name: "Samsung Galaxy Buds 2 Pro", category: "audio", price: 95000, image: "", badge: "" },
-        { id: 6, name: "JBL Flip 6", category: "audio", price: 85000, image: "", badge: "" },
-        { id: 7, name: "Apple Watch Series 9", category: "montre", price: 350000, image: "", badge: "Nouveau" },
-        { id: 8, name: "Samsung Galaxy Watch 6", category: "montre", price: 250000, image: "", badge: "" },
-        { id: 9, name: "Coque iPhone Protection", category: "accessoire", price: 15000, image: "", badge: "" },
-        { id: 10, name: "Chargeur Rapide 65W", category: "accessoire", price: 25000, image: "", badge: "Promo" },
-        { id: 11, name: "Power Bank 20000mAh", category: "accessoire", price: 35000, image: "", badge: "" },
-        { id: 12, name: "Câble USB-C Tressé", category: "accessoire", price: 8000, image: "", badge: "" }
-    ];
-    return loadJSON(PRODUCTS_FILE, defaultProducts);
-}
+// ==========================================
+// FONCTIONS UTILITAIRES
+// ==========================================
 
 function formatPrice(price) {
     return price.toLocaleString('fr-FR') + ' FCFA';
@@ -115,7 +123,6 @@ function parseBody(req) {
         let body = '';
         req.on('data', chunk => body += chunk.toString());
         req.on('end', () => {
-            // Si c'est du JSON
             if (req.headers['content-type']?.includes('application/json')) {
                 try {
                     resolve(body ? JSON.parse(body) : {});
@@ -123,7 +130,6 @@ function parseBody(req) {
                     resolve({});
                 }
             } else {
-                // Si c'est du form-urlencoded
                 const params = new URLSearchParams(body);
                 const result = {};
                 for (const [key, value] of params) {
@@ -166,7 +172,6 @@ function parseMultipart(req) {
                             const newFilename = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${ext}`;
                             const filepath = path.join(UPLOADS_DIR, newFilename);
 
-                            // Extraire le contenu binaire
                             const binaryContent = Buffer.from(content, 'binary');
                             fs.writeFileSync(filepath, binaryContent);
 
@@ -495,6 +500,13 @@ function getAdminPage(orders, products, config) {
             font-size: 0.75rem;
             margin-left: 10px;
         }
+        .db-status {
+            background: #28a745;
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
@@ -504,6 +516,7 @@ function getAdminPage(orders, products, config) {
             <span>Administration</span>
         </a>
         <div class="header-actions">
+            <span class="db-status">MongoDB Connecté</span>
             <a href="/" class="btn btn-secondary" target="_blank"><i class="fas fa-external-link-alt"></i> Voir le site</a>
             <a href="/admin/logout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
         </div>
@@ -585,10 +598,10 @@ function getAdminPage(orders, products, config) {
                             <h4>${p.name} ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}</h4>
                             <div class="product-price">${formatPrice(p.price)}</div>
                             <div class="product-actions">
-                                <button class="btn btn-secondary btn-sm" onclick="editProduct(${p.id})">
+                                <button class="btn btn-secondary btn-sm" onclick="editProduct('${p._id}')">
                                     <i class="fas fa-edit"></i> Modifier
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">
+                                <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p._id}')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -605,7 +618,7 @@ function getAdminPage(orders, products, config) {
                 <form method="POST" action="/admin/settings">
                     <div class="form-group">
                         <label>Nouveau nom d'utilisateur</label>
-                        <input type="text" name="username" value="${config.admin?.username || 'admin'}" required>
+                        <input type="text" name="username" value="${config.username || 'admin'}" required>
                     </div>
                     <div class="form-group">
                         <label>Nouveau mot de passe</label>
@@ -664,7 +677,7 @@ function getAdminPage(orders, products, config) {
     </div>
 
     <script>
-        const products = ${JSON.stringify(products)};
+        const products = ${JSON.stringify(products.map(p => ({...p, _id: p._id.toString()})))};
 
         function showTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -687,13 +700,13 @@ function getAdminPage(orders, products, config) {
         }
 
         function editProduct(id) {
-            const product = products.find(p => p.id === id);
+            const product = products.find(p => p._id === id);
             if (!product) return;
 
             document.getElementById('productModal').classList.add('active');
             document.getElementById('modalTitle').textContent = 'Modifier le produit';
             document.getElementById('productForm').action = '/admin/products/edit';
-            document.getElementById('productId').value = product.id;
+            document.getElementById('productId').value = product._id;
             document.getElementById('productName').value = product.name;
             document.getElementById('productCategory').value = product.category;
             document.getElementById('productPrice').value = product.price;
@@ -725,7 +738,6 @@ function getAdminPage(orders, products, config) {
             }
         }
 
-        // Fermer modal avec Escape
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeModal();
         });
@@ -739,6 +751,13 @@ function getAdminPage(orders, products, config) {
 // ==========================================
 
 const server = http.createServer(async (req, res) => {
+    // Attendre la connexion DB
+    if (!db) {
+        res.writeHead(503, { 'Content-Type': 'text/html' });
+        res.end('<h1>Service en cours de démarrage...</h1><p>Rechargez la page dans quelques secondes.</p>');
+        return;
+    }
+
     const url = new URL(req.url, `http://${req.headers.host}`);
     const pathname = url.pathname;
 
@@ -755,38 +774,52 @@ const server = http.createServer(async (req, res) => {
 
     // ============ API PUBLIQUE ============
 
-    // API: Liste des produits (pour le frontend)
+    // API: Liste des produits
     if (req.method === 'GET' && pathname === '/api/produits') {
-        const products = loadProducts();
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(products));
+        try {
+            const products = await db.collection('products').find({}).toArray();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(products.map(p => ({
+                id: p._id.toString(),
+                name: p.name,
+                category: p.category,
+                price: p.price,
+                image: p.image,
+                badge: p.badge
+            }))));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Erreur serveur' }));
+        }
         return;
     }
 
     // API: Nouvelle commande
     if (req.method === 'POST' && pathname === '/api/commandes') {
-        const orderData = await parseBody(req);
-        const orders = loadJSON(ORDERS_FILE, []);
-        orders.push(orderData);
-        saveJSON(ORDERS_FILE, orders);
+        try {
+            const orderData = await parseBody(req);
+            await db.collection('orders').insertOne(orderData);
 
-        console.log('\n' + '='.repeat(50));
-        console.log('🛒 NOUVELLE COMMANDE!');
-        console.log(`📋 ${orderData.numeroCommande}`);
-        console.log(`👤 ${orderData.client?.prenom} ${orderData.client?.nom}`);
-        console.log(`📞 ${orderData.client?.telephone}`);
-        console.log(`📍 ${orderData.client?.localite}`);
-        console.log(`💰 ${formatPrice(orderData.total || 0)}`);
-        console.log('='.repeat(50) + '\n');
+            console.log('\n' + '='.repeat(50));
+            console.log('🛒 NOUVELLE COMMANDE!');
+            console.log(`📋 ${orderData.numeroCommande}`);
+            console.log(`👤 ${orderData.client?.prenom} ${orderData.client?.nom}`);
+            console.log(`📞 ${orderData.client?.telephone}`);
+            console.log(`📍 ${orderData.client?.localite}`);
+            console.log(`💰 ${formatPrice(orderData.total || 0)}`);
+            console.log('='.repeat(50) + '\n');
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: true }));
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        } catch (error) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Erreur serveur' }));
+        }
         return;
     }
 
     // ============ AUTHENTIFICATION ============
 
-    // Page de login
     if (pathname === '/admin/login') {
         if (req.method === 'GET') {
             res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -796,14 +829,11 @@ const server = http.createServer(async (req, res) => {
 
         if (req.method === 'POST') {
             const body = await parseBody(req);
-            const config = loadConfig();
+            const config = await db.collection('config').findOne({ _id: 'admin' });
 
-            const username = body.username;
-            const password = body.password;
-
-            if (username === config.admin.username && password === config.admin.password) {
+            if (body.username === config.username && body.password === config.password) {
                 const sessionId = generateSessionId();
-                sessions.set(sessionId, { username, createdAt: Date.now() });
+                sessions.set(sessionId, { username: body.username, createdAt: Date.now() });
 
                 res.writeHead(302, {
                     'Location': '/admin',
@@ -841,9 +871,9 @@ const server = http.createServer(async (req, res) => {
 
         // Dashboard admin
         if (pathname === '/admin' && req.method === 'GET') {
-            const orders = loadJSON(ORDERS_FILE, []);
-            const products = loadProducts();
-            const config = loadConfig();
+            const orders = await db.collection('orders').find({}).toArray();
+            const products = await db.collection('products').find({}).toArray();
+            const config = await db.collection('config').findOne({ _id: 'admin' });
             res.writeHead(200, { 'Content-Type': 'text/html' });
             res.end(getAdminPage(orders, products, config));
             return;
@@ -852,14 +882,14 @@ const server = http.createServer(async (req, res) => {
         // Modifier les paramètres
         if (pathname === '/admin/settings' && req.method === 'POST') {
             const body = await parseBody(req);
-            const config = loadConfig();
-
-            config.admin.username = body.username || config.admin.username;
+            const updateData = { username: body.username };
             if (body.password) {
-                config.admin.password = body.password;
+                updateData.password = body.password;
             }
-            saveConfig(config);
-
+            await db.collection('config').updateOne(
+                { _id: 'admin' },
+                { $set: updateData }
+            );
             res.writeHead(302, { 'Location': '/admin' });
             res.end();
             return;
@@ -868,20 +898,14 @@ const server = http.createServer(async (req, res) => {
         // Ajouter un produit
         if (pathname === '/admin/products/add' && req.method === 'POST') {
             const { fields, file } = await parseMultipart(req);
-            const products = loadProducts();
-
             const newProduct = {
-                id: Date.now(),
                 name: fields.name,
                 category: fields.category,
                 price: parseInt(fields.price) || 0,
                 badge: fields.badge || '',
                 image: file ? file.path : ''
             };
-
-            products.push(newProduct);
-            saveJSON(PRODUCTS_FILE, products);
-
+            await db.collection('products').insertOne(newProduct);
             res.writeHead(302, { 'Location': '/admin' });
             res.end();
             return;
@@ -889,21 +913,21 @@ const server = http.createServer(async (req, res) => {
 
         // Modifier un produit
         if (pathname === '/admin/products/edit' && req.method === 'POST') {
+            const { ObjectId } = require('mongodb');
             const { fields, file } = await parseMultipart(req);
-            const products = loadProducts();
-            const index = products.findIndex(p => p.id === parseInt(fields.id));
-
-            if (index !== -1) {
-                products[index].name = fields.name;
-                products[index].category = fields.category;
-                products[index].price = parseInt(fields.price) || 0;
-                products[index].badge = fields.badge || '';
-                if (file) {
-                    products[index].image = file.path;
-                }
-                saveJSON(PRODUCTS_FILE, products);
+            const updateData = {
+                name: fields.name,
+                category: fields.category,
+                price: parseInt(fields.price) || 0,
+                badge: fields.badge || ''
+            };
+            if (file) {
+                updateData.image = file.path;
             }
-
+            await db.collection('products').updateOne(
+                { _id: new ObjectId(fields.id) },
+                { $set: updateData }
+            );
             res.writeHead(302, { 'Location': '/admin' });
             res.end();
             return;
@@ -911,11 +935,9 @@ const server = http.createServer(async (req, res) => {
 
         // Supprimer un produit
         if (pathname === '/admin/products/delete' && req.method === 'POST') {
+            const { ObjectId } = require('mongodb');
             const body = await parseBody(req);
-            let products = loadProducts();
-            products = products.filter(p => p.id !== body.id);
-            saveJSON(PRODUCTS_FILE, products);
-
+            await db.collection('products').deleteOne({ _id: new ObjectId(body.id) });
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true }));
             return;
@@ -941,20 +963,23 @@ const server = http.createServer(async (req, res) => {
     });
 });
 
-server.listen(PORT, () => {
-    // Initialiser les fichiers si nécessaires
-    if (!fs.existsSync(CONFIG_FILE)) {
-        saveConfig({ admin: { username: 'admin', password: 'admin' } });
-    }
-    if (!fs.existsSync(PRODUCTS_FILE)) {
-        saveJSON(PRODUCTS_FILE, loadProducts());
+// Démarrer le serveur après connexion DB
+async function startServer() {
+    console.log('\n' + '='.repeat(50));
+    console.log('🚀 FASO GADGET - Démarrage...');
+    console.log('='.repeat(50));
+
+    const connected = await connectDB();
+
+    if (!connected) {
+        console.log('⚠️  Mode dégradé: MongoDB non disponible');
     }
 
-    console.log('\n' + '='.repeat(50));
-    console.log('🚀 FASO GADGET - Serveur démarré!');
-    console.log('='.repeat(50));
-    console.log(`📍 Site: http://localhost:${PORT}`);
-    console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
-    console.log(`   Login: admin / admin`);
-    console.log('='.repeat(50) + '\n');
-});
+    server.listen(PORT, () => {
+        console.log(`📍 Site: http://localhost:${PORT}`);
+        console.log(`🔐 Admin: http://localhost:${PORT}/admin`);
+        console.log('='.repeat(50) + '\n');
+    });
+}
+
+startServer();
