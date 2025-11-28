@@ -1,0 +1,53 @@
+/* Icones locales - Version SVG inline pour fonctionnement hors-ligne */
+
+/* Base icon styles */
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    fill: currentColor;
+}
+
+/* Font Awesome compatible classes using Unicode/SVG */
+.fas, .fab, .fa {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    display: inline-block;
+    text-rendering: auto;
+}
+
+/* Icones utilisees dans le site */
+.fa-shopping-cart::before { content: "🛒"; }
+.fa-cart-plus::before { content: "🛒"; }
+.fa-bars::before { content: "☰"; }
+.fa-times::before { content: "✕"; }
+.fa-check::before { content: "✓"; }
+.fa-check-circle::before { content: "✔"; }
+.fa-trash::before { content: "🗑"; }
+.fa-plus::before { content: "+"; }
+.fa-minus::before { content: "−"; }
+.fa-edit::before { content: "✎"; }
+.fa-save::before { content: "💾"; }
+.fa-image::before { content: "🖼"; }
+.fa-box::before { content: "📦"; }
+.fa-box-open::before { content: "📦"; }
+.fa-clipboard-list::before { content: "📋"; }
+.fa-user::before { content: "👤"; }
+.fa-phone::before { content: "📞"; }
+.fa-mobile-alt::before { content: "📱"; }
+.fa-envelope::before { content: "✉"; }
+.fa-map-marker-alt::before { content: "📍"; }
+.fa-shipping-fast::before { content: "🚚"; }
+.fa-shield-alt::before { content: "🛡"; }
+.fa-headset::before { content: "🎧"; }
+.fa-money-bill-wave::before { content: "💵"; }
+.fa-cog::before { content: "⚙"; }
+.fa-key::before { content: "🔑"; }
+.fa-sign-out-alt::before { content: "🚪"; }
+.fa-external-link-alt::before { content: "↗"; }
+.fa-inbox::before { content: "📥"; }
+.fa-facebook::before { content: "f"; font-weight: bold; }
+.fa-whatsapp::before { content: "W"; font-weight: bold; }
+.fa-instagram::before { content: "📷"; }
+.fa-twitter::before { content: "𝕏"; }

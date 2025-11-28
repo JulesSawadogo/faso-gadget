@@ -1,0 +1,106 @@
+[
+  {
+    "id": 1,
+    "name": "iPhone 15 Pro Max",
+    "category": "smartphone",
+    "price": 850000,
+    "image": "",
+    "badge": "Nouveau"
+  },
+  {
+    "id": 2,
+    "name": "Samsung Galaxy S24 Ultra",
+    "category": "smartphone",
+    "price": 750000,
+    "image": "",
+    "badge": "Populaire"
+  },
+  {
+    "id": 3,
+    "name": "Xiaomi 14 Pro",
+    "category": "smartphone",
+    "price": 450000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 4,
+    "name": "AirPods Pro 2",
+    "category": "audio",
+    "price": 150000,
+    "image": "",
+    "badge": "Best-seller"
+  },
+  {
+    "id": 5,
+    "name": "Samsung Galaxy Buds 2 Pro",
+    "category": "audio",
+    "price": 95000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 6,
+    "name": "JBL Flip 6",
+    "category": "audio",
+    "price": 85000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 7,
+    "name": "Apple Watch Series 9",
+    "category": "montre",
+    "price": 350000,
+    "image": "",
+    "badge": "Nouveau"
+  },
+  {
+    "id": 8,
+    "name": "Samsung Galaxy Watch 6",
+    "category": "montre",
+    "price": 250000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 9,
+    "name": "Coque iPhone Protection",
+    "category": "accessoire",
+    "price": 15000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 10,
+    "name": "Chargeur Rapide 65W",
+    "category": "accessoire",
+    "price": 25000,
+    "image": "",
+    "badge": "Promo"
+  },
+  {
+    "id": 11,
+    "name": "Power Bank 20000mAh",
+    "category": "accessoire",
+    "price": 35000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 12,
+    "name": "Câble USB-C Tressé",
+    "category": "accessoire",
+    "price": 8000,
+    "image": "",
+    "badge": ""
+  },
+  {
+    "id": 1764345706660,
+    "name": "test",
+    "category": "smartphone",
+    "price": 45000,
+    "badge": "NOUVEAU",
+    "image": "/uploads/1764345706657-b5z2sgqrq.png"
+  }
+]

@@ -1,0 +1,60 @@
+[
+  {
+    "client": {
+      "nom": "sawadogo",
+      "prenom": "jules",
+      "telephone": "74985889",
+      "localite": "ouaga",
+      "notes": ""
+    },
+    "produits": [
+      {
+        "nom": "iPhone 15 Pro Max",
+        "prix": 850000,
+        "quantite": 1,
+        "sousTotal": 850000
+      },
+      {
+        "nom": "Samsung Galaxy Buds 2 Pro",
+        "prix": 95000,
+        "quantite": 1,
+        "sousTotal": 95000
+      },
+      {
+        "nom": "Apple Watch Series 9",
+        "prix": 350000,
+        "quantite": 1,
+        "sousTotal": 350000
+      }
+    ],
+    "total": 1295000,
+    "date": "2025-11-28T11:24:26.803Z",
+    "numeroCommande": "FG-1764329066803"
+  },
+  {
+    "client": {
+      "nom": "sawadogo",
+      "prenom": "rodrigue",
+      "telephone": "74985889",
+      "localite": "tanghin",
+      "notes": ""
+    },
+    "produits": [
+      {
+        "nom": "Samsung Galaxy S24 Ultra",
+        "prix": 750000,
+        "quantite": 1,
+        "sousTotal": 750000
+      },
+      {
+        "nom": "Câble USB-C Tressé",
+        "prix": 8000,
+        "quantite": 1,
+        "sousTotal": 8000
+      }
+    ],
+    "total": 758000,
+    "date": "2025-11-28T16:00:16.863Z",
+    "numeroCommande": "FG-1764345616863"
+  }
+]

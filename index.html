@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faso Gadget - Vos Gadgets High-Tech au Burkina Faso</title>
+    <link rel="stylesheet" href="/css/fonts.css">
+    <link rel="stylesheet" href="/css/icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="#accueil" class="logo">
+                <img src="/logo.png" alt="Faso Gadgets" class="logo-img">
+            </a>
+            <nav class="nav">
+                <a href="#accueil">Accueil</a>
+                <a href="#catalogue">Catalogue</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            <div class="cart-icon" onclick="toggleCart()">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#accueil" onclick="toggleMobileMenu()">Accueil</a>
+        <a href="#catalogue" onclick="toggleMobileMenu()">Catalogue</a>
+        <a href="#contact" onclick="toggleMobileMenu()">Contact</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <div class="hero-content">
+            <h1>Bienvenue chez <span class="accent">Faso Gadget</span></h1>
+            <p>Votre destination N°1 pour les gadgets high-tech au Burkina Faso. Qualité, innovation et prix imbattables!</p>
+            <a href="#catalogue" class="btn btn-primary">Découvrir nos produits</a>
+        </div>
+        <div class="hero-decoration">
+            <div class="circle circle-1"></div>
+            <div class="circle circle-2"></div>
+            <div class="circle circle-3"></div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+        <div class="container">
+            <div class="feature">
+                <i class="fas fa-shipping-fast"></i>
+                <h3>Livraison Rapide</h3>
+                <p>Partout au Burkina Faso</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-shield-alt"></i>
+                <h3>Garantie</h3>
+                <p>Produits garantis</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-headset"></i>
+                <h3>Support 24/7</h3>
+                <p>À votre écoute</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>Meilleurs Prix</h3>
+                <p>Prix compétitifs</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalogue -->
+    <section class="catalogue" id="catalogue">
+        <div class="container">
+            <h2 class="section-title">Notre <span class="accent">Catalogue</span></h2>
+            <p class="section-subtitle">Découvrez notre sélection de gadgets high-tech</p>
+
+            <!-- Filtres -->
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterProducts('all')">Tous</button>
+                <button class="filter-btn" onclick="filterProducts('smartphone')">Smartphones</button>
+                <button class="filter-btn" onclick="filterProducts('accessoire')">Accessoires</button>
+                <button class="filter-btn" onclick="filterProducts('audio')">Audio</button>
+                <button class="filter-btn" onclick="filterProducts('montre')">Montres</button>
+            </div>
+
+            <!-- Produits -->
+            <div class="products-grid" id="productsGrid">
+                <!-- Les produits seront injectés ici par JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <h2 class="section-title">Nous <span class="accent">Contacter</span></h2>
+            <div class="contact-info">
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>Ouagadougou, Burkina Faso</p>
+                    <a href="https://share.google/s1nCCA7nADwctCBR6" target="_blank" style="color:#e63946;font-size:0.85rem;">Voir sur Google Maps</a>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <p><a href="tel:+22670780153" style="color:#fff;">+226 70 78 01 53</a></p>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <p style="color:#ff7900;">Orange Money</p>
+                    <p><a href="tel:+22676045717" style="color:#fff;">+226 76 04 57 17</a></p>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <p><a href="mailto:clepture@gmail.com" style="color:#fff;">clepture@gmail.com</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panier Sidebar -->
+    <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> Mon Panier</h3>
+            <button class="close-cart" onclick="toggleCart()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <!-- Items du panier -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">0 FCFA</span>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="openOrderModal()">
+                Commander
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Commande -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-list"></i> Finaliser la commande</h3>
+                <button class="close-modal" onclick="closeOrderModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm" onsubmit="submitOrder(event)">
+                    <div class="form-group">
+                        <label for="nom">Nom *</label>
+                        <input type="text" id="nom" name="nom" required placeholder="Votre nom">
+                    </div>
+                    <div class="form-group">
+                        <label for="prenom">Prénom *</label>
+                        <input type="text" id="prenom" name="prenom" required placeholder="Votre prénom">
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone">Téléphone *</label>
+                        <input type="tel" id="telephone" name="telephone" required placeholder="+226 XX XX XX XX">
+                    </div>
+                    <div class="form-group">
+                        <label for="localite">Localité / Adresse *</label>
+                        <input type="text" id="localite" name="localite" required placeholder="Ex: Ouagadougou, Secteur 15">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes supplémentaires</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Instructions de livraison..."></textarea>
+                    </div>
+
+                    <div class="order-summary">
+                        <h4>Récapitulatif de la commande</h4>
+                        <div id="orderSummaryItems"></div>
+                        <div class="order-total">
+                            <strong>Total: <span id="orderTotal">0 FCFA</span></strong>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-check"></i> Confirmer la commande
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmation -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal modal-success">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Commande envoyée avec succès!</h3>
+            <p>Merci pour votre commande. Notre équipe vous contactera très bientôt pour la confirmation et la livraison.</p>
+            <button class="btn btn-primary" onclick="closeConfirmModal()">Fermer</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#accueil" class="logo">
+                        <img src="/logo.png" alt="Faso Gadgets" class="logo-img">
+                    </a>
+                    <p>Votre partenaire high-tech de confiance au Burkina Faso.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Liens Rapides</h4>
+                    <a href="#accueil">Accueil</a>
+                    <a href="#catalogue">Catalogue</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="footer-social">
+                    <h4>Suivez-nous</h4>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/share/17axkcsdC6/" target="_blank"><i class="fab fa-facebook"></i></a>
+                        <a href="https://wa.me/22670780153" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="mailto:clepture@gmail.com"><i class="fas fa-envelope"></i></a>
+                        <a href="tel:+22670780153"><i class="fas fa-phone"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Faso Gadget. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
